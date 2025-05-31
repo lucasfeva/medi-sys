@@ -1,6 +1,10 @@
 import { zodResolver } from "@hookform/resolvers/zod";
+import { LoaderCircle } from "lucide-react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import z from "zod";
+
+import { authClient } from "@/lib/auth-client";
 
 import { Button } from "../ui/button";
 import {
@@ -28,6 +32,7 @@ const signupSchema = z.object({
 });
 
 export default function SignupForm() {
+  const router = useRouter();
   const form = useForm<z.infer<typeof signupSchema>>({
     resolver: zodResolver(signupSchema),
     defaultValues: {
@@ -37,8 +42,19 @@ export default function SignupForm() {
     },
   });
 
-  function onSubmit(data: z.infer<typeof signupSchema>) {
-    console.log(data);
+  async function onSubmit(data: z.infer<typeof signupSchema>) {
+    await authClient.signUp.email(
+      {
+        email: data.email,
+        password: data.password,
+        name: data.name,
+      },
+      {
+        onSuccess: () => {
+          router.push("/dashboard");
+        },
+      },
+    );
   }
 
   return (
@@ -97,8 +113,16 @@ export default function SignupForm() {
             />
           </CardContent>
           <CardFooter>
-            <Button className="w-full" type="submit">
-              Cadastrar
+            <Button
+              className="w-full"
+              type="submit"
+              disabled={form.formState.isSubmitting}
+            >
+              {form.formState.isSubmitting ? (
+                <LoaderCircle className="h-4 w-4 animate-spin" />
+              ) : (
+                "Criar conta"
+              )}
             </Button>
           </CardFooter>
         </form>
