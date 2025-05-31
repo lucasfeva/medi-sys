@@ -1,15 +1,7 @@
 "use client";
 
+import SigninForm from "@/components/authentication/signin-form";
 import SignupForm from "@/components/authentication/signup-form";
-import { Button } from "@/components/ui/button";
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 export default function AuthenticationPage() {
@@ -20,22 +12,9 @@ export default function AuthenticationPage() {
           <TabsTrigger value="signin">Login</TabsTrigger>
           <TabsTrigger value="signup">Criar conta</TabsTrigger>
         </TabsList>
-
         <TabsContent value="signin">
-          <Card>
-            <CardHeader>
-              <CardTitle>Bem vindo de volta!</CardTitle>
-              <CardDescription>
-                Entre com sua conta para continuar
-              </CardDescription>
-            </CardHeader>
-            <CardContent className="space-y-4"></CardContent>
-            <CardFooter>
-              <Button className="w-full">Entrar</Button>
-            </CardFooter>
-          </Card>
+          <SigninForm />
         </TabsContent>
-
         <TabsContent value="signup">
           <SignupForm />
         </TabsContent>
