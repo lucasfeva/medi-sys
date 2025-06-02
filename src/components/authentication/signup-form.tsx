@@ -2,6 +2,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { LoaderCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
+import { toast } from "sonner";
 import z from "zod";
 
 import { authClient } from "@/lib/auth-client";
@@ -52,6 +53,13 @@ export default function SignupForm() {
       {
         onSuccess: () => {
           router.push("/dashboard");
+        },
+        onError: (ctx) => {
+          if (ctx.error.code === "USER_ALREADY_EXISTS") {
+            toast.error("Usuário já existe com esse e-mail.");
+            return;
+          }
+          toast.error("Erro ao criar conta.");
         },
       },
     );
