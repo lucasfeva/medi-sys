@@ -2,6 +2,7 @@
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { LoaderCircle } from "lucide-react";
+import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -43,7 +44,7 @@ export default function SigninForm() {
     },
   });
 
-  async function onSubmit(data: z.infer<typeof signinSchema>) {
+  const handleSubmit = async (data: z.infer<typeof signinSchema>) => {
     await authClient.signIn.email(
       {
         email: data.email,
@@ -58,12 +59,19 @@ export default function SigninForm() {
         },
       },
     );
-  }
+  };
+
+  const handleGoogleSignIn = async () => {
+    await authClient.signIn.social({
+      provider: "google",
+      callbackURL: "/dashboard",
+    });
+  };
 
   return (
     <Card>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+        <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
           <CardHeader>
             <CardTitle>Bem vindo de volta!</CardTitle>
             <CardDescription>
@@ -102,7 +110,7 @@ export default function SigninForm() {
               )}
             />
           </CardContent>
-          <CardFooter>
+          <CardFooter className="flex flex-col space-y-4">
             <Button
               className="w-full"
               type="submit"
@@ -114,6 +122,28 @@ export default function SigninForm() {
                 "Entrar"
               )}
             </Button>
+            <div className="w-full space-y-4">
+              <div className="after:border-border relative text-center text-sm after:absolute after:inset-0 after:top-1/2 after:z-0 after:flex after:items-center after:border-t">
+                <span className="bg-background text-muted-foreground relative z-10 px-2">
+                  Ou continue com
+                </span>
+              </div>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={handleGoogleSignIn}
+                type="button"
+              >
+                <Image
+                  src="/icons/google.svg"
+                  alt="Google Logo"
+                  width={20}
+                  height={20}
+                  className="mr-2"
+                />
+                Login com Google
+              </Button>
+            </div>
           </CardFooter>
         </form>
       </Form>
