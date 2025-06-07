@@ -1,7 +1,7 @@
-import { Plus } from "lucide-react";
 import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
+import AddDoctorButton from "@/components/doctors/add-doctor-botton";
 import {
   PageActions,
   PageContainer,
@@ -11,7 +11,6 @@ import {
   PageHeaderContent,
   PageTitle,
 } from "@/components/global/page-container";
-import { Button } from "@/components/ui/button";
 import { auth } from "@/lib/auth";
 
 export default async function DoctorsPage() {
@@ -33,10 +32,7 @@ export default async function DoctorsPage() {
           <PageDescription>Gerencie os médicos da sua clínica</PageDescription>
         </PageHeaderContent>
         <PageActions>
-          <Button>
-            <Plus />
-            Adicionar médico
-          </Button>
+          <AddDoctorButton />
         </PageActions>
       </PageHeader>
       <PageContent>pagina médicos</PageContent>
