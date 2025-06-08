@@ -1,23 +1,42 @@
 "use server";
 
+import dayjs from "dayjs";
+import utc from "dayjs/plugin/utc";
+import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 
 import { db } from "@/db";
 import { doctorsTable } from "@/db/schema";
 import { auth } from "@/lib/auth";
-import { actionClient } from "@/lib/safe-action";
+import { actionClient } from "@/lib/next-safe-action";
 
 import { upsertDoctorSchema } from "./schema";
+
+dayjs.extend(utc);
 
 export const upsertDoctor = actionClient
   .schema(upsertDoctorSchema)
   .action(async ({ parsedInput }) => {
+    const availableFromTime = parsedInput.availableFromTime;
+    const availableToTime = parsedInput.availableToTime;
+
+    const availableFromTimeUTC = dayjs()
+      .set("hour", parseInt(availableFromTime.split(":")[0]))
+      .set("minute", parseInt(availableFromTime.split(":")[1]))
+      .set("second", parseInt(availableFromTime.split(":")[2]))
+      .utc();
+    const availableToTimeUTC = dayjs()
+      .set("hour", parseInt(availableToTime.split(":")[0]))
+      .set("minute", parseInt(availableToTime.split(":")[1]))
+      .set("second", parseInt(availableToTime.split(":")[2]))
+      .utc();
+
     const session = await auth.api.getSession({
       headers: await headers(),
     });
 
     if (!session?.user) {
-      throw new Error("unauthorized");
+      throw new Error("Unauthorized");
     }
 
     if (!session?.user.clinic?.id) {
@@ -34,19 +53,16 @@ export const upsertDoctor = actionClient
         appointmentPriceInCents: parsedInput.appointmentPriceInCents,
         availableFromWeekday: parsedInput.availableFromWeekDay,
         availableToWeekday: parsedInput.availableToWeekDay,
-        availableFromTime: parsedInput.availableFromTime,
-        availableToTime: parsedInput.availableToTime,
+        availableFromTime: availableFromTimeUTC.format("HH:mm:ss"),
+        availableToTime: availableToTimeUTC.format("HH:mm:ss"),
       })
       .onConflictDoUpdate({
         target: [doctorsTable.id],
         set: {
-          name: parsedInput.name,
-          specialty: parsedInput.specialty,
-          appointmentPriceInCents: parsedInput.appointmentPriceInCents,
-          availableFromWeekday: parsedInput.availableFromWeekDay,
-          availableToWeekday: parsedInput.availableToWeekDay,
-          availableFromTime: parsedInput.availableFromTime,
-          availableToTime: parsedInput.availableToTime,
+          ...parsedInput,
+          availableFromTime: availableFromTimeUTC.format("HH:mm:ss"),
+          availableToTime: availableToTimeUTC.format("HH:mm:ss"),
         },
       });
+    revalidatePath("/doctors");
   });
