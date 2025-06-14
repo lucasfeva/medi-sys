@@ -1,6 +1,7 @@
 "use client";
 
 import { Calendar, Clock, DollarSign } from "lucide-react";
+import { useState } from "react";
 
 import type { doctorsTable } from "@/db/schema";
 import { getAvailability } from "@/helpers/availability";
@@ -19,6 +20,8 @@ interface DoctorCardProps {
 }
 
 export default function DoctorCard({ doctor }: DoctorCardProps) {
+  const [isUpsertDoctorDialogOpen, setIsUpsertDoctorDialogOpen] =
+    useState(false);
   const doctorInitials = doctor.name
     .split(" ")
     .map((word) => word.charAt(0).toUpperCase())
@@ -34,7 +37,7 @@ export default function DoctorCard({ doctor }: DoctorCardProps) {
             <AvatarFallback>{doctorInitials}</AvatarFallback>
           </Avatar>
           <div>
-            <h3 className="text-sm font-medium">{doctor.name}c</h3>
+            <h3 className="text-sm font-medium">{doctor.name}</h3>
             <p className="text-muted-foreground text-sm">{doctor.specialty}</p>
           </div>
         </div>
@@ -57,11 +60,23 @@ export default function DoctorCard({ doctor }: DoctorCardProps) {
       </CardContent>
       <Separator />
       <CardFooter>
-        <Dialog>
+        <Dialog
+          open={isUpsertDoctorDialogOpen}
+          onOpenChange={setIsUpsertDoctorDialogOpen}
+        >
           <DialogTrigger asChild>
             <Button className="w-full">Ver detalhes</Button>
           </DialogTrigger>
-          <UpsertDoctorForm />
+          <UpsertDoctorForm
+            doctor={{
+              ...doctor,
+              availableFromTime: availability.from.format("HH:mm:ss"),
+              availableToTime: availability.to.format("HH:mm:ss"),
+            }}
+            onSuccess={() => {
+              setIsUpsertDoctorDialogOpen(false);
+            }}
+          />
         </Dialog>
       </CardFooter>
     </Card>
